@@ -1,0 +1,13 @@
+﻿{% extends "base.html" %}
+{% block title %}Page Not Found{% endblock %}
+{% block content %}
+<div class="container py-5 text-center" style="min-height:60vh;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+  <div style="font-size:5rem;">🏫</div>
+  <h1 class="fw-800 text-navy mt-3">404 — Page Not Found</h1>
+  <p class="text-muted fs-5 mb-4">The page you are looking for does not exist or has been moved.</p>
+  <div class="d-flex gap-3 justify-content-center">
+    <a href="/" class="btn cad-btn-primary btn-lg">Go Home</a>
+    <a href="/facilities/" class="btn btn-outline-secondary btn-lg">Explore Facilities</a>
+  </div>
+</div>
+{% endblock %}

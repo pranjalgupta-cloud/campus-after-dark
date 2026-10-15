@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% block title %}Home{% endblock %}
+{% block content %}
+
+<!-- ══ WELCOME BANNER (What is this platform?) ════════════════════════ -->
+<section style="background: linear-gradient(90deg, #1a2332 0%, #0f3460 60%, #1a2332 100%); border-bottom: 3px solid #f5a623;">
+  <div class="container py-3 text-center">
+    <span class="text-white" style="font-size:0.92rem; letter-spacing:0.03em;">
+      <i class="bi bi-building-check me-2 text-warning"></i>
+      <strong>Campus After Dark</strong> — India's first marketplace where colleges &amp; universities rent out their
+      idle spaces (auditoriums, labs, sports grounds and more) to organisations who need them.
+      <a href="/how-it-works/" class="text-warning ms-2 text-decoration-none fw-600">How it works →</a>
+    </span>
+  </div>
+</section>
+
+<!-- ══ HERO ══════════════════════════════════════════════════════════ -->
+<section class="cad-hero">
+  <div class="container position-relative">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6">
+        <div class="fade-in-up">
+          <span class="cad-badge cad-badge-amber mb-3 d-inline-block">🇮🇳 India's Campus Marketplace</span>
+          <h1 class="cad-hero-title mb-3">Your Campus Has <span class="text-amber">More to Offer.</span></h1>
+          <p class="cad-hero-subtitle mb-4">Turn unused campus spaces into revenue. Discover and book unique educational venues for your next event, training, or conference.</p>
+          <div class="d-flex gap-3 flex-wrap">
+            <a href="/facilities/" class="btn cad-btn-primary btn-lg px-4">Explore Facilities</a>
+            <a href="/for-institutions/" class="btn btn-outline-light btn-lg px-4">List Your Space</a>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <!-- Search Panel -->
+        <div class="cad-search-panel fade-in-up">
+          <h5 class="fw-700 text-navy mb-3"><i class="bi bi-search me-2 text-amber"></i>Find Your Perfect Venue</h5>
+          <form action="/facilities/" method="GET">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">What are you looking for?</label>
+                <input type="text" name="q" class="form-control" placeholder="e.g. Auditorium, Computer Lab, Sports Ground...">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">City</label>
+                <select name="city" class="form-select">
+                  <option value="">All Cities</option>
+                  <option>Mumbai</option><option>Delhi</option><option>Bengaluru</option>
+                  <option>Hyderabad</option><option>Chennai</option><option>Pune</option>
+                  <option>Ahmedabad</option><option>Kolkata</option><option>Jaipur</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Category</label>
+                <select name="category" class="form-select">
+                  <option value="">All Categories</option>
+                  {% for value, label in categories %}
+                  <option value="{{ value }}">{{ label }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Date</label>
+                <input type="date" name="date" class="form-control">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Min Capacity</label>
+                <input type="number" name="min_capacity" class="form-control" placeholder="e.g. 100">
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn cad-btn-primary btn-lg w-100">
+                  <i class="bi bi-search me-2"></i>Search Facilities
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ STATS ═════════════════════════════════════════════════════════ -->
+<section class="cad-stats-section">
+  <div class="container text-center">
+    <div class="cad-notice-demo mb-4 d-inline-block">
+      <i class="bi bi-info-circle me-1"></i> Platform statistics shown below are live data from the database.
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-6 col-md-3">
+        <div class="cad-big-stat">{{ stats.institutions }}+</div>
+        <div class="cad-big-stat-label">Verified Institutions</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="cad-big-stat">{{ stats.facilities }}+</div>
+        <div class="cad-big-stat-label">Active Facilities</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="cad-big-stat">{{ stats.bookings }}+</div>
+        <div class="cad-big-stat-label">Successful Bookings</div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="cad-big-stat">{{ stats.cities }}+</div>
+        <div class="cad-big-stat-label">Cities Covered</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CATEGORIES ════════════════════════════════════════════════════ -->
+<section class="py-5 bg-white">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="cad-section-title">Browse by Category</h2>
+      <div class="cad-divider-amber mx-auto"></div>
+      <p class="cad-section-sub">From auditoriums to sports grounds — find exactly what you need</p>
+    </div>
+    <div class="row g-3">
+      {% for value, label in categories %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <a href="/facilities/?category={{ value }}" class="cad-category-card">
+          <div class="cad-category-icon">
+            {% if value == 'auditorium' %}🎭
+            {% elif value == 'classroom' %}📚
+            {% elif value == 'computer_lab' %}💻
+            {% elif value == 'sports_ground' %}⚽
+            {% elif value == 'indoor_sports' %}🏸
+            {% elif value == 'parking' %}🅿️
+            {% elif value == 'multipurpose' %}🏛️
+            {% elif value == 'library' %}📖
+            {% elif value == 'cafeteria' %}☕
+            {% else %}🏫
+            {% endif %}
+          </div>
+          <div class="fw-600 small">{{ label }}</div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- ══ FEATURED FACILITIES ═══════════════════════════════════════════ -->
+<section class="py-5" style="background: var(--cad-gray-50);">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+      <div>
+        <h2 class="cad-section-title mb-1">Featured Venues</h2>
+        <div class="cad-divider-amber"></div>
+      </div>
+      <a href="/facilities/" class="btn cad-btn-outline">View All <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+    {% if featured_facilities %}
+    <div class="row g-4">
+      {% for facility in featured_facilities %}
+      <div class="col-md-6 col-lg-4">
+        <a href="/facilities/{{ facility.pk }}/" class="text-decoration-none">
+          <div class="cad-facility-card h-100">
+            {% if facility.primary_image %}
+              <img src="{{ facility.primary_image }}" class="cad-facility-img" alt="{{ facility.name }}">
+            {% else %}
+              <div class="cad-facility-img-placeholder">
+                <i class="bi bi-building"></i>
+              </div>
+            {% endif %}
+            <div class="cad-card-body">
+              <div class="d-flex justify-content-between align-items-start mb-1">
+                <span class="cad-badge cad-badge-navy">{{ facility.get_category_display }}</span>
+                {% if facility.is_featured %}<i class="bi bi-star-fill text-amber"></i>{% endif %}
+              </div>
+              <h5 class="fw-700 mt-2 mb-1 text-navy" style="font-size:0.97rem;">{{ facility.name }}</h5>
+              <p class="text-muted small mb-2">
+                <i class="bi bi-geo-alt me-1"></i>{{ facility.city }}, {{ facility.state }}
+              </p>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="cad-price-tag">{{ facility.formatted_price }}<span class="text-muted fw-400 small">/hr</span></span>
+                <span class="text-muted small"><i class="bi bi-people me-1"></i>{{ facility.capacity }}</span>
+              </div>
+            </div>
+          </div>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-building display-3 text-muted"></i>
+      <p class="text-muted mt-3">No published facilities yet. <a href="/accounts/register/institution/">Be the first to list one!</a></p>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ══ HOW IT WORKS ══════════════════════════════════════════════════ -->
+<section class="py-5 bg-white">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="cad-section-title">How It Works</h2>
+      <div class="cad-divider-amber mx-auto"></div>
+    </div>
+    <div class="row g-5">
+      <div class="col-lg-6">
+        <h4 class="fw-700 text-navy mb-4"><i class="bi bi-building me-2 text-amber"></i>For Institutions</h4>
+        <div class="d-flex gap-3 mb-4">
+          <div class="cad-step-number">1</div>
+          <div><h6 class="fw-700">Register & Verify</h6><p class="text-muted small mb-0">Create your institution account and submit verification documents. Admin approves within 48 hours.</p></div>
+        </div>
+        <div class="d-flex gap-3 mb-4">
+          <div class="cad-step-number">2</div>
+          <div><h6 class="fw-700">List Facilities</h6><p class="text-muted small mb-0">Add your auditoriums, labs, sports grounds with photos, pricing, and availability.</p></div>
+        </div>
+        <div class="d-flex gap-3 mb-4">
+          <div class="cad-step-number">3</div>
+          <div><h6 class="fw-700">Approve & Earn</h6><p class="text-muted small mb-0">Review booking requests, approve suitable ones, and receive transparent payouts.</p></div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <h4 class="fw-700 text-navy mb-4"><i class="bi bi-briefcase me-2 text-amber"></i>For Organizations</h4>
+        <div class="d-flex gap-3 mb-4">
+          <div class="cad-step-number">1</div>
+          <div><h6 class="fw-700">Discover Venues</h6><p class="text-muted small mb-0">Search across hundreds of campus facilities by city, type, capacity, and budget.</p></div>
+        </div>
+        <div class="d-flex gap-3 mb-4">
+          <div class="cad-step-number">2</div>
+          <div><h6 class="fw-700">Request & Confirm</h6><p class="text-muted small mb-0">Submit a booking request with your requirements. Get approval and complete secure payment.</p></div>
+        </div>
+        <div class="d-flex gap-3 mb-4">
+          <div class="cad-step-number">3</div>
+          <div><h6 class="fw-700">Use & Review</h6><p class="text-muted small mb-0">Use the venue and leave a review to help the community discover great spaces.</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="text-center mt-3">
+      <a href="/how-it-works/" class="btn cad-btn-navy">Learn More <i class="bi bi-arrow-right ms-1"></i></a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CTA ════════════════════════════════════════════════════════════ -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--cad-navy) 0%, var(--cad-navy-mid) 100%);">
+  <div class="container text-center text-white py-3">
+    <h2 class="fw-800 mb-3" style="font-size: clamp(1.6rem, 3vw, 2.4rem);">Ready to Unlock Your Campus's Potential?</h2>
+    <p class="opacity-75 mb-4 fs-5">Join institutions across India earning additional revenue from underutilized spaces.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="/accounts/register/institution/" class="btn cad-btn-primary btn-lg px-5">List Your Facility</a>
+      <a href="/facilities/" class="btn btn-outline-light btn-lg px-5">Find a Venue</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══ PLATFORM EXPLAINER ════════════════════════════════════════════ -->
+<section class="py-5" style="background: var(--cad-gray-50);">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="cad-section-title">What is Campus After Dark?</h2>
+      <div class="cad-divider-amber mx-auto"></div>
+      <p class="cad-section-sub mt-3" style="max-width:680px;margin:0 auto;">
+        Colleges and universities in India have world-class infrastructure — auditoriums, computer labs, sports fields —
+        that sits idle after hours and on weekends. <strong>Campus After Dark</strong> unlocks that potential
+        by connecting campuses (who earn rent) with businesses, NGOs, and event organisers (who need affordable venues).
+      </p>
+    </div>
+    <div class="row g-4 justify-content-center">
+      <div class="col-md-4">
+        <div class="cad-stat-card h-100 text-center">
+          <div style="font-size:2.5rem; margin-bottom:0.75rem;">🏫</div>
+          <h5 class="fw-700 text-navy mb-2">For Colleges &amp; Universities</h5>
+          <p class="text-muted small mb-0">
+            List your unused spaces — auditoriums, labs, grounds — set your own pricing and availability,
+            and start earning transparent revenue every time someone books them.
+          </p>
+          <a href="/for-institutions/" class="btn cad-btn-outline mt-3 btn-sm">Learn More</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="cad-stat-card h-100 text-center">
+          <div style="font-size:2.5rem; margin-bottom:0.75rem;">🏢</div>
+          <h5 class="fw-700 text-navy mb-2">For Organisations &amp; Renters</h5>
+          <p class="text-muted small mb-0">
+            Search verified campus venues by city, type, and capacity. Submit a booking request,
+            pay securely online, and use premium infrastructure at a fraction of hotel costs.
+          </p>
+          <a href="/for-organisations/" class="btn cad-btn-outline mt-3 btn-sm">Learn More</a>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="cad-stat-card h-100 text-center">
+          <div style="font-size:2.5rem; margin-bottom:0.75rem;">⚙️</div>
+          <h5 class="fw-700 text-navy mb-2">Platform Administration</h5>
+          <p class="text-muted small mb-0">
+            Admins verify institutions, monitor bookings, manage payouts, and configure the platform
+            commission — all from a single control panel dashboard.
+          </p>
+          <a href="/how-it-works/" class="btn cad-btn-outline mt-3 btn-sm">See the Flow</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ TESTIMONIALS (Sample) ═════════════════════════════════════════ -->
+<section class="py-5 bg-white">
+  <div class="container">
+    <div class="text-center mb-4">
+      <h2 class="cad-section-title">What People Say</h2>
+      <div class="cad-divider-amber mx-auto"></div>
+      <div class="cad-notice-demo d-inline-block mt-2">
+        <i class="bi bi-info-circle me-1"></i> These are <strong>sample testimonials</strong> for illustrative purposes.
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="cad-stat-card h-100">
+          <div class="cad-stars mb-2">★★★★★</div>
+          <p class="text-muted small mb-3">"Renting our auditorium through Campus After Dark has been seamless. We earned ₹2.4L last quarter from spaces that used to sit empty."</p>
+          <div class="fw-600 small text-navy">Dr. Priya Sharma</div>
+          <div class="text-muted" style="font-size:0.78rem;">Director, Demo Engineering College, Mumbai [SAMPLE]</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="cad-stat-card h-100">
+          <div class="cad-stars mb-2">★★★★★</div>
+          <p class="text-muted small mb-3">"We found the perfect venue for our 300-person conference in under 10 minutes. The booking process was transparent and professional."</p>
+          <div class="fw-600 small text-navy">Arjun Mehta</div>
+          <div class="text-muted" style="font-size:0.78rem;">Events Manager, Demo Corp, Bengaluru [SAMPLE]</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="cad-stat-card h-100">
+          <div class="cad-stars mb-2">★★★★☆</div>
+          <p class="text-muted small mb-3">"Great platform. The commission structure is fair and payouts are transparent. We know exactly what we earn from each booking."</p>
+          <div class="fw-600 small text-navy">Kavya Nair</div>
+          <div class="text-muted" style="font-size:0.78rem;">Admin, Demo University, Pune [SAMPLE]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

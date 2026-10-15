@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}{{ facility.name }}{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <!-- Breadcrumb -->
+  <nav class="cad-breadcrumb mb-3" aria-label="breadcrumb">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="/">Home</a></li>
+      <li class="breadcrumb-item"><a href="/facilities/">Explore</a></li>
+      <li class="breadcrumb-item active">{{ facility.name|truncatechars:40 }}</li>
+    </ol>
+  </nav>
+
+  <div class="row g-4">
+    <!-- Left: Images + Details -->
+    <div class="col-lg-8">
+      <!-- Images -->
+      {% with images=facility.images.all %}
+      {% if images %}
+      <div class="cad-gallery-main mb-3">
+        <img src="{{ images.0.image.url }}" alt="{{ facility.name }}" id="mainImg" style="width:100%;height:400px;object-fit:cover;border-radius:14px;">
+      </div>
+      {% if images.count > 1 %}
+      <div class="d-flex gap-2 mb-4 overflow-auto pb-2">
+        {% for img in images %}
+        <div class="cad-gallery-thumb flex-shrink-0" onclick="document.getElementById('mainImg').src='{{ img.image.url }}'">
+          <img src="{{ img.image.url }}" alt="Image {{ forloop.counter }}">
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% else %}
+      <div class="cad-facility-img-placeholder mb-4" style="height:350px;border-radius:14px;font-size:5rem;">🏫</div>
+      {% endif %}
+      {% endwith %}
+
+      <!-- Info -->
+      <div class="d-flex flex-wrap gap-2 mb-3">
+        <span class="cad-badge cad-badge-navy">{{ facility.get_category_display }}</span>
+        <span class="cad-badge cad-badge-green"><i class="bi bi-patch-check me-1"></i>Verified Institution</span>
+        {% if facility.is_featured %}<span class="cad-badge cad-badge-amber"><i class="bi bi-star-fill me-1"></i>Featured</span>{% endif %}
+      </div>
+      <h1 class="fw-800 text-navy mb-1" style="font-size:clamp(1.4rem,3vw,2rem);">{{ facility.name }}</h1>
+      <p class="text-muted mb-3">
+        <i class="bi bi-building me-1"></i>{{ facility.institution.name }} &nbsp;|&nbsp;
+        <i class="bi bi-geo-alt me-1"></i>{{ facility.city }}, {{ facility.state }}
+        {% if facility.address %} — {{ facility.address }}{% endif %}
+      </p>
+
+      {% if avg_rating %}
+      <div class="d-flex align-items-center gap-2 mb-3">
+        <span class="cad-stars">{% for i in "12345" %}{% if forloop.counter <= avg_rating|floatformat:"0" %}★{% else %}☆{% endif %}{% endfor %}</span>
+        <span class="fw-600">{{ avg_rating|floatformat:1 }}</span>
+        <span class="text-muted small">({{ review_count }} review{{ review_count|pluralize }})</span>
+      </div>
+      {% endif %}
+
+      <!-- Description -->
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-3"><i class="bi bi-info-circle me-2 text-amber"></i>About This Facility</h5>
+        <p style="white-space:pre-line;">{{ facility.description }}</p>
+      </div>
+
+      <!-- Amenities -->
+      {% if amenities %}
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-3"><i class="bi bi-check2-square me-2 text-amber"></i>Amenities</h5>
+        <div class="d-flex flex-wrap gap-2">
+          {% for amenity in amenities %}
+          <span class="cad-amenity-pill"><i class="{{ amenity.icon|default:'bi-check' }} me-1"></i>{{ amenity.name }}</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Rules -->
+      {% if facility.rules %}
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-3"><i class="bi bi-shield-check me-2 text-amber"></i>Rules & Restrictions</h5>
+        <p style="white-space:pre-line;" class="small text-muted">{{ facility.rules }}</p>
+      </div>
+      {% endif %}
+
+      {% if facility.permitted_activities %}
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-3"><i class="bi bi-calendar-check me-2 text-amber"></i>Permitted Activities</h5>
+        <p style="white-space:pre-line;" class="small text-muted">{{ facility.permitted_activities }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Reviews -->
+      {% if reviews %}
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-3"><i class="bi bi-chat-square-text me-2 text-amber"></i>Reviews</h5>
+        {% for review in reviews %}
+        <div class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="fw-600 small">{{ review.reviewer.first_name }} {{ review.reviewer.last_name|first }}.</span>
+            <span class="text-muted" style="font-size:0.75rem;">{{ review.created_at|date:"d M Y" }}</span>
+          </div>
+          <div class="cad-stars small mb-1">{% for i in "12345" %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+          <p class="text-muted small mb-0">{{ review.comment }}</p>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <!-- Right: Booking Panel -->
+    <div class="col-lg-4">
+      <div class="cad-form-card sticky-top" style="top:80px;">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <span class="cad-price-tag fs-4">{{ facility.formatted_price }}</span>
+            <span class="text-muted small"> / {{ facility.get_pricing_model_display }}</span>
+          </div>
+          <span class="cad-badge cad-badge-green">Available</span>
+        </div>
+
+        <!-- Quick Info -->
+        <div class="mb-3">
+          <div class="d-flex justify-content-between small py-2 border-bottom">
+            <span class="text-muted">Capacity</span>
+            <span class="fw-600">Up to {{ facility.capacity }} people</span>
+          </div>
+          <div class="d-flex justify-content-between small py-2 border-bottom">
+            <span class="text-muted">Available Days</span>
+            <span class="fw-600">{{ facility.available_days }}</span>
+          </div>
+          <div class="d-flex justify-content-between small py-2 border-bottom">
+            <span class="text-muted">Operating Hours</span>
+            <span class="fw-600">{{ facility.opening_time|time:"g:i A" }} – {{ facility.closing_time|time:"g:i A" }}</span>
+          </div>
+          <div class="d-flex justify-content-between small py-2">
+            <span class="text-muted">Min. Duration</span>
+            <span class="fw-600">{{ facility.min_booking_hours }} hour{{ facility.min_booking_hours|pluralize }}</span>
+          </div>
+        </div>
+
+        {% if user.is_authenticated and user.is_org %}
+        <a href="/bookings/request/{{ facility.pk }}/" class="btn cad-btn-primary btn-lg w-100 mb-2">
+          <i class="bi bi-calendar-plus me-2"></i>Request Booking
+        </a>
+        {% elif user.is_authenticated and user.is_institution %}
+        <div class="cad-notice-info text-center small">Institutions cannot make bookings.</div>
+        {% elif not user.is_authenticated %}
+        <a href="/accounts/login/?next=/bookings/request/{{ facility.pk }}/" class="btn cad-btn-primary btn-lg w-100 mb-2">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In to Book
+        </a>
+        <a href="/accounts/register/organization/" class="btn btn-outline-secondary w-100 btn-sm">
+          New here? Register free
+        </a>
+        {% endif %}
+
+        <!-- Commission note -->
+        <div class="cad-notice-demo mt-3 small">
+          <i class="bi bi-info-circle me-1"></i>A platform commission of 10% applies. Full breakdown shown before payment.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

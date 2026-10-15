@@ -1,0 +1,53 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% block title %}All Bookings — Admin{% endblock %}
+{% block page_title %}Booking Management{% endblock %}
+{% block sidebar_nav %}
+<a href="/dashboard/admin/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="/dashboard/admin/institutions/" class="nav-link"><i class="bi bi-building"></i> Institutions</a>
+<a href="/dashboard/admin/users/" class="nav-link"><i class="bi bi-people"></i> Users</a>
+<a href="/dashboard/admin/bookings/" class="nav-link active"><i class="bi bi-calendar-check"></i> Bookings</a>
+<a href="/dashboard/admin/settings/" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+{% endblock %}
+{% block dashboard_content %}
+<div class="d-flex gap-2 mb-4 flex-wrap">
+  {% for val, label in status_choices %}
+  <a href="?status={{ val }}" class="btn btn-sm {% if status_filter == val %}cad-btn-navy{% else %}btn-outline-secondary{% endif %}">{{ label }}</a>
+  {% endfor %}
+  <a href="/dashboard/admin/bookings/" class="btn btn-sm btn-outline-secondary">All</a>
+</div>
+<div class="cad-table-wrapper">
+  <div class="table-responsive">
+    <table class="cad-table w-100">
+      <thead>
+        <tr><th>Reference</th><th>Facility</th><th>Organization</th><th>Date</th><th>Duration</th><th>Amount</th><th>Commission</th><th>Status</th></tr>
+      </thead>
+      <tbody>
+        {% for b in page_obj %}
+        <tr>
+          <td><a href="/bookings/{{ b.pk }}/" class="fw-600 text-navy">{{ b.reference_number }}</a></td>
+          <td class="small">
+            <div class="fw-600">{{ b.facility.name|truncatechars:22 }}</div>
+            <div class="text-muted">{{ b.facility.institution.name|truncatechars:20 }}</div>
+          </td>
+          <td class="small">{{ b.organization.name|truncatechars:20 }}</td>
+          <td class="small">{{ b.booked_date|date:"d M Y" }}</td>
+          <td class="small">{{ b.duration_display }}</td>
+          <td class="fw-600 small">₹{{ b.subtotal|floatformat:0 }}</td>
+          <td class="small text-muted">₹{{ b.commission_amount|floatformat:0 }}</td>
+          <td><span class="cad-badge status-{{ b.status }}" style="font-size:0.7rem;">{{ b.get_status_display }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8" class="text-center py-4 text-muted">No bookings found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% if page_obj.has_other_pages %}
+<nav class="mt-4 d-flex justify-content-center"><ul class="pagination">
+  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">&laquo;</a></li>{% endif %}
+  <li class="page-item active"><span class="page-link" style="background:var(--cad-navy);">{{ page_obj.number }}</span></li>
+  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">&raquo;</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

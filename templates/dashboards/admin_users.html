@@ -1,0 +1,74 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% block title %}Users — Admin{% endblock %}
+{% block page_title %}User Management{% endblock %}
+{% block sidebar_nav %}
+<a href="/dashboard/admin/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="/dashboard/admin/institutions/" class="nav-link"><i class="bi bi-building"></i> Institutions</a>
+<a href="/dashboard/admin/users/" class="nav-link active"><i class="bi bi-people"></i> Users</a>
+<a href="/dashboard/admin/bookings/" class="nav-link"><i class="bi bi-calendar-check"></i> Bookings</a>
+<a href="/dashboard/admin/settings/" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+{% endblock %}
+{% block dashboard_content %}
+<form method="GET" class="d-flex gap-2 mb-4 flex-wrap">
+  <input type="text" name="q" value="{{ q }}" class="form-control" style="max-width:260px;" placeholder="Search email or name...">
+  <select name="role" class="form-select" style="max-width:180px;">
+    <option value="">All Roles</option>
+    <option value="institution" {% if role == 'institution' %}selected{% endif %}>Institution</option>
+    <option value="organization" {% if role == 'organization' %}selected{% endif %}>Organization</option>
+    <option value="admin" {% if role == 'admin' %}selected{% endif %}>Admin</option>
+  </select>
+  <button type="submit" class="btn cad-btn-navy">Filter</button>
+  <a href="/dashboard/admin/users/" class="btn btn-outline-secondary">Clear</a>
+</form>
+
+<div class="cad-table-wrapper">
+  <div class="table-responsive">
+    <table class="cad-table w-100">
+      <thead>
+        <tr><th>Email</th><th>Name</th><th>Role</th><th>Status</th><th>Joined</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for u in page_obj %}
+        <tr>
+          <td class="small">{{ u.email }}</td>
+          <td class="small fw-600">{{ u.get_full_name|default:"—" }}</td>
+          <td><span class="cad-badge cad-badge-navy">{{ u.get_role_display }}</span></td>
+          <td>
+            {% if u.account_status == 'active' %}
+            <span class="cad-badge cad-badge-green">Active</span>
+            {% else %}
+            <span class="cad-badge cad-badge-red">{{ u.get_account_status_display }}</span>
+            {% endif %}
+          </td>
+          <td class="small text-muted">{{ u.created_at|date:"d M Y" }}</td>
+          <td>
+            {% if u.account_status == 'active' %}
+            <form method="POST" action="/dashboard/admin/users/{{ u.pk }}/toggle/">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="suspend">
+              <button type="submit" class="btn btn-sm btn-warning py-0" data-confirm="Suspend {{ u.email }}?">Suspend</button>
+            </form>
+            {% else %}
+            <form method="POST" action="/dashboard/admin/users/{{ u.pk }}/toggle/">
+              {% csrf_token %}
+              <input type="hidden" name="action" value="activate">
+              <button type="submit" class="btn btn-sm btn-success py-0" data-confirm="Activate {{ u.email }}?">Activate</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center py-4 text-muted">No users found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% if page_obj.has_other_pages %}
+<nav class="mt-4 d-flex justify-content-center"><ul class="pagination">
+  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ q }}&role={{ role }}">&laquo;</a></li>{% endif %}
+  <li class="page-item active"><span class="page-link" style="background:var(--cad-navy);">{{ page_obj.number }}</span></li>
+  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ q }}&role={{ role }}">&raquo;</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

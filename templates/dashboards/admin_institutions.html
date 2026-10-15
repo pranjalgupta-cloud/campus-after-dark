@@ -1,0 +1,97 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% block title %}Institutions — Admin{% endblock %}
+{% block page_title %}Institution Verification{% endblock %}
+{% block sidebar_nav %}
+<a href="/dashboard/admin/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="/dashboard/admin/institutions/" class="nav-link active"><i class="bi bi-building"></i> Institutions</a>
+<a href="/dashboard/admin/users/" class="nav-link"><i class="bi bi-people"></i> Users</a>
+<a href="/dashboard/admin/bookings/" class="nav-link"><i class="bi bi-calendar-check"></i> Bookings</a>
+<a href="/dashboard/admin/settings/" class="nav-link"><i class="bi bi-gear"></i> Settings</a>
+{% endblock %}
+{% block dashboard_content %}
+<!-- Filter Tabs -->
+<div class="d-flex gap-2 mb-4 flex-wrap">
+  <a href="/dashboard/admin/institutions/" class="btn btn-sm {% if not status_filter %}cad-btn-navy{% else %}btn-outline-secondary{% endif %}">All</a>
+  <a href="?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-warning{% else %}btn-outline-warning{% endif %}">Pending</a>
+  <a href="?status=approved" class="btn btn-sm {% if status_filter == 'approved' %}btn-success{% else %}btn-outline-success{% endif %}">Approved</a>
+  <a href="?status=rejected" class="btn btn-sm {% if status_filter == 'rejected' %}btn-danger{% else %}btn-outline-danger{% endif %}">Rejected</a>
+  <a href="?status=suspended" class="btn btn-sm {% if status_filter == 'suspended' %}cad-btn-navy{% else %}btn-outline-secondary{% endif %}">Suspended</a>
+</div>
+
+<div class="cad-table-wrapper">
+  <div class="table-responsive">
+    <table class="cad-table w-100">
+      <thead>
+        <tr><th>Institution</th><th>City/State</th><th>User Email</th><th>Status</th><th>Registered</th><th>Actions</th></tr>
+      </thead>
+      <tbody>
+        {% for inst in page_obj %}
+        <tr>
+          <td>
+            <div class="fw-600">{{ inst.name }}</div>
+            <div class="text-muted small">{{ inst.institution_type }}</div>
+          </td>
+          <td class="small">{{ inst.city }}, {{ inst.state }}</td>
+          <td class="small">{{ inst.user.email }}</td>
+          <td><span class="cad-badge status-{{ inst.verification_status }}">{{ inst.get_verification_status_display }}</span></td>
+          <td class="small text-muted">{{ inst.created_at|date:"d M Y" }}</td>
+          <td>
+            <div class="d-flex gap-1 flex-wrap">
+              {% if inst.verification_status == 'pending' or inst.verification_status == 'rejected' %}
+              <form method="POST" action="/dashboard/admin/institutions/{{ inst.pk }}/action/">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="approve">
+                <button type="submit" class="btn btn-sm btn-success py-0" data-confirm="Approve {{ inst.name }}?">Approve</button>
+              </form>
+              {% endif %}
+              {% if inst.verification_status != 'rejected' %}
+              <button type="button" class="btn btn-sm btn-danger py-0" data-bs-toggle="modal" data-bs-target="#rejectModal{{ inst.pk }}">Reject</button>
+              {% endif %}
+              {% if inst.verification_status == 'approved' %}
+              <form method="POST" action="/dashboard/admin/institutions/{{ inst.pk }}/action/">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="suspend">
+                <button type="submit" class="btn btn-sm btn-warning py-0" data-confirm="Suspend {{ inst.name }}?">Suspend</button>
+              </form>
+              {% endif %}
+            </div>
+            <!-- Reject Modal -->
+            <div class="modal fade" id="rejectModal{{ inst.pk }}" tabindex="-1">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header"><h5 class="modal-title fw-700">Reject Institution</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                  <form method="POST" action="/dashboard/admin/institutions/{{ inst.pk }}/action/">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="reject">
+                    <div class="modal-body">
+                      <p>Rejecting: <strong>{{ inst.name }}</strong></p>
+                      <label class="form-label">Reason *</label>
+                      <textarea name="reason" class="form-control" rows="3" required placeholder="Provide reason for rejection..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                      <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                      <button class="btn btn-danger">Reject</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center py-4 text-muted">No institutions found.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if page_obj.has_other_pages %}
+<nav class="mt-4 d-flex justify-content-center"><ul class="pagination">
+  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">&laquo;</a></li>{% endif %}
+  <li class="page-item active"><span class="page-link" style="background:var(--cad-navy);">{{ page_obj.number }}</span></li>
+  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if status_filter %}&status={{ status_filter }}{% endif %}">&raquo;</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

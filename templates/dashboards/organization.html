@@ -1,0 +1,110 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% block title %}Organization Dashboard{% endblock %}
+{% block page_title %}My Dashboard{% endblock %}
+
+{% block sidebar_nav %}
+<div class="cad-sidebar-section">BOOKINGS</div>
+<a href="/dashboard/organization/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="/bookings/my/" class="nav-link"><i class="bi bi-calendar"></i> My Bookings</a>
+<a href="/facilities/" class="nav-link"><i class="bi bi-search"></i> Find Venues</a>
+<div class="cad-sidebar-section">ACCOUNT</div>
+<a href="/accounts/profile/" class="nav-link"><i class="bi bi-person"></i> My Profile</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<!-- Welcome -->
+<div class="cad-form-card mb-4" style="background:linear-gradient(135deg,var(--cad-navy),var(--cad-navy-mid));color:#fff;border:none;">
+  <h4 class="fw-800 mb-1">Welcome, {{ request.user.first_name|default:request.user.email }}!</h4>
+  <p class="opacity-75 mb-3">Here's an overview of your bookings with Campus After Dark.</p>
+  <a href="/facilities/" class="btn cad-btn-primary"><i class="bi bi-search me-2"></i>Find a Venue</a>
+</div>
+
+<!-- Stats -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card text-center">
+      <div class="cad-stat-value text-navy">{{ total_requests }}</div>
+      <div class="cad-stat-label">Total Requests</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card text-center">
+      <div class="cad-stat-value text-warning">{{ pending_approvals }}</div>
+      <div class="cad-stat-label">Awaiting Approval</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card text-center">
+      <div class="cad-stat-value" style="color:var(--cad-blue);">{{ awaiting_payment }}</div>
+      <div class="cad-stat-label">Awaiting Payment</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card text-center">
+      <div class="cad-stat-value" style="color:var(--cad-green);">{{ upcoming }}</div>
+      <div class="cad-stat-label">Upcoming Confirmed</div>
+    </div>
+  </div>
+</div>
+
+<!-- Notifications -->
+{% if notifications %}
+<div class="cad-form-card mb-4">
+  <div class="d-flex justify-content-between mb-3">
+    <h5 class="fw-700 mb-0"><i class="bi bi-bell me-2 text-amber"></i>Notifications</h5>
+    <a href="/bookings/notifications/read/" class="btn btn-sm btn-outline-secondary" id="markAllRead">Mark all read</a>
+  </div>
+  {% for notif in notifications %}
+  <div class="d-flex gap-3 mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+    <div class="mt-1"><i class="bi bi-dot fs-3 text-amber"></i></div>
+    <div>
+      <div class="fw-600 small">{{ notif.title }}</div>
+      <div class="text-muted small">{{ notif.message }}</div>
+      <div class="text-muted" style="font-size:0.72rem;">{{ notif.created_at|date:"d M Y, g:i A" }}</div>
+      {% if notif.related_booking %}
+      <a href="/bookings/{{ notif.related_booking.pk }}/" class="btn btn-xs btn-outline-secondary mt-1 btn-sm py-0 px-2" style="font-size:0.75rem;">View Booking</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+<!-- Recent Bookings -->
+<div class="cad-table-wrapper">
+  <div class="d-flex justify-content-between align-items-center p-3">
+    <h5 class="fw-700 mb-0"><i class="bi bi-clock-history me-2 text-amber"></i>Recent Bookings</h5>
+    <a href="/bookings/my/" class="btn btn-sm btn-outline-secondary">View All</a>
+  </div>
+  <div class="table-responsive">
+    <table class="cad-table w-100">
+      <thead>
+        <tr><th>Ref #</th><th>Facility</th><th>Date</th><th>Amount</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for booking in recent_bookings %}
+        <tr>
+          <td><a href="/bookings/{{ booking.pk }}/" class="fw-600 text-navy">{{ booking.reference_number }}</a></td>
+          <td>
+            <div class="fw-600 small">{{ booking.facility.name|truncatechars:28 }}</div>
+            <div class="text-muted" style="font-size:0.75rem;">{{ booking.facility.institution.name|truncatechars:25 }}</div>
+          </td>
+          <td class="small">{{ booking.booked_date|date:"d M Y" }}</td>
+          <td class="fw-600">₹{{ booking.total_amount|floatformat:0 }}</td>
+          <td><span class="cad-badge status-{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+          <td>
+            {% if booking.status == 'approved_awaiting_payment' %}
+            <a href="/bookings/{{ booking.pk }}/payment/" class="btn btn-sm cad-btn-primary">Pay Now</a>
+            {% else %}
+            <a href="/bookings/{{ booking.pk }}/" class="btn btn-sm btn-outline-secondary">View</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center py-4 text-muted">No bookings yet. <a href="/facilities/">Explore venues →</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

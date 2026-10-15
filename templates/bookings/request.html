@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+{% block title %}Book {{ facility.name }}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:800px;">
+  <nav class="cad-breadcrumb mb-3"><ol class="breadcrumb small">
+    <li class="breadcrumb-item"><a href="/facilities/">Explore</a></li>
+    <li class="breadcrumb-item"><a href="/facilities/{{ facility.pk }}/">{{ facility.name|truncatechars:30 }}</a></li>
+    <li class="breadcrumb-item active">Request Booking</li>
+  </ol></nav>
+
+  <div class="cad-notice-demo mb-4">
+    <i class="bi bi-lightbulb me-1"></i> <strong>Demo Mode:</strong> This is a full booking request flow. The institution must approve before payment is required. Payment is a demo simulation — no real money is charged.
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="cad-form-card">
+        <h4 class="fw-800 text-navy mb-4"><i class="bi bi-calendar-plus me-2 text-amber"></i>Booking Request</h4>
+        <form method="POST" id="bookingForm">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Booking Date *</label>
+              {{ form.booked_date }}
+              {% if form.booked_date.errors %}<div class="invalid-feedback d-block">{{ form.booked_date.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Start Time *</label>
+              {{ form.start_time }}
+              {% if form.start_time.errors %}<div class="invalid-feedback d-block">{{ form.start_time.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">End Time *</label>
+              {{ form.end_time }}
+              {% if form.end_time.errors %}<div class="invalid-feedback d-block">{{ form.end_time.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Expected Attendees *</label>
+              {{ form.attendee_count }}
+              <div class="form-text">Maximum capacity: {{ facility.capacity }}</div>
+              {% if form.attendee_count.errors %}<div class="invalid-feedback d-block">{{ form.attendee_count.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Purpose of Booking *</label>
+              {{ form.purpose }}
+              {% if form.purpose.errors %}<div class="invalid-feedback d-block">{{ form.purpose.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label">Additional Requirements</label>
+              {{ form.additional_requirements }}
+            </div>
+          </div>
+          {% if form.non_field_errors %}
+          <div class="alert alert-danger mt-3 py-2">{{ form.non_field_errors|join:" " }}</div>
+          {% endif %}
+          <button type="submit" class="btn cad-btn-primary btn-lg w-100 mt-4">
+            <i class="bi bi-send me-2"></i>Submit Booking Request
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <!-- Price Preview -->
+      <div class="cad-form-card mb-3">
+        <h5 class="fw-700 mb-3"><i class="bi bi-receipt me-2 text-amber"></i>Price Estimate</h5>
+        <!-- Hidden inputs for JS calculator -->
+        <input type="hidden" id="pricePerHour" value="{{ facility.price_per_unit }}">
+        <input type="hidden" id="commissionRate" value="10">
+
+        <div class="d-flex justify-content-between small py-1">
+          <span class="text-muted">Rate</span>
+          <span class="fw-600">{{ facility.formatted_price }} / hr</span>
+        </div>
+        <div id="priceBreakdown" style="display:none;" class="mt-2">
+          <div class="cad-price-breakdown">
+            <div class="breakdown-row"><span>Duration</span><span id="calcHours">—</span></div>
+            <div class="breakdown-row"><span>Subtotal</span><span id="calcSubtotal">—</span></div>
+            <div class="breakdown-row text-muted"><span>Platform Commission (10%)</span><span id="calcCommission">—</span></div>
+            <div class="breakdown-row text-muted"><span>Institution Payout</span><span id="calcPayout">—</span></div>
+            <div class="breakdown-total"><span>Amount Due</span><span class="text-amber" id="calcTotal">—</span></div>
+          </div>
+        </div>
+        <p class="text-muted small mt-2 mb-0">Select time above to see price breakdown.</p>
+      </div>
+      <!-- Facility summary -->
+      <div class="cad-form-card">
+        <h6 class="fw-700 mb-2">{{ facility.name }}</h6>
+        <p class="text-muted small mb-1"><i class="bi bi-building me-1"></i>{{ facility.institution.name }}</p>
+        <p class="text-muted small mb-1"><i class="bi bi-geo-alt me-1"></i>{{ facility.city }}, {{ facility.state }}</p>
+        <p class="text-muted small mb-1"><i class="bi bi-clock me-1"></i>{{ facility.opening_time|time:"g:i A" }} – {{ facility.closing_time|time:"g:i A" }}</p>
+        <p class="text-muted small mb-0"><i class="bi bi-calendar-week me-1"></i>{{ facility.available_days }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var s = document.getElementById('id_start_time');
+  var e = document.getElementById('id_end_time');
+  if (s) s.addEventListener('change', calcBookingPrice);
+  if (e) e.addEventListener('change', calcBookingPrice);
+});
+</script>
+{% endblock %}

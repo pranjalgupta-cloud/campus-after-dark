@@ -1,0 +1,15 @@
+﻿{% extends "base.html" %}
+{% block title %}Contact Us{% endblock %}
+{% block content %}
+<div class="cad-page-hero"><div class="container"><h2 class="fw-800 text-navy">Contact Us</h2><p class="text-muted">Get in touch with the Campus After Dark team</p></div></div>
+<div class="container py-5"><div class="row g-5 justify-content-center"><div class="col-lg-6"><div class="cad-form-card">
+  <h5 class="fw-700 mb-4">Send a Message</h5>
+  <form method="POST">{% csrf_token %}
+    <div class="mb-3"><label class="form-label">Your Name</label><input type="text" class="form-control" name="name" required></div>
+    <div class="mb-3"><label class="form-label">Email</label><input type="email" class="form-control" name="email" required></div>
+    <div class="mb-3"><label class="form-label">Subject</label><input type="text" class="form-control" name="subject" required></div>
+    <div class="mb-4"><label class="form-label">Message</label><textarea class="form-control" name="message" rows="5" required></textarea></div>
+    <button type="submit" class="btn cad-btn-primary w-100">Send Message</button>
+  </form>
+</div></div><div class="col-lg-4"><div class="cad-stat-card mb-3"><i class="bi bi-envelope text-amber fs-4 mb-2"></i><h6 class="fw-700">Email</h6><p class="text-muted small">support@campusafterdark.in</p></div><div class="cad-stat-card mb-3"><i class="bi bi-telephone text-amber fs-4 mb-2"></i><h6 class="fw-700">Phone</h6><p class="text-muted small">+91 98765 43210 (Demo)</p></div><div class="cad-stat-card"><i class="bi bi-geo-alt text-amber fs-4 mb-2"></i><h6 class="fw-700">Location</h6><p class="text-muted small">Mumbai, Maharashtra, India</p></div></div></div></div>
+{% endblock %}

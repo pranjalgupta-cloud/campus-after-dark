@@ -1,0 +1,177 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Platform Admin Dashboard{% endblock %}
+
+{% block sidebar_nav %}
+<div class="cad-sidebar-section">OVERVIEW</div>
+<a href="/dashboard/admin/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<div class="cad-sidebar-section">MANAGEMENT</div>
+<a href="/dashboard/admin/institutions/" class="nav-link"><i class="bi bi-building"></i> Institutions
+  {% if pending_verifications > 0 %}<span class="badge bg-warning text-dark ms-auto">{{ pending_verifications }}</span>{% endif %}
+</a>
+<a href="/dashboard/admin/users/" class="nav-link"><i class="bi bi-people"></i> Users</a>
+<a href="/dashboard/admin/bookings/" class="nav-link"><i class="bi bi-calendar-check"></i> All Bookings</a>
+<div class="cad-sidebar-section">SETTINGS</div>
+<a href="/dashboard/admin/settings/" class="nav-link"><i class="bi bi-gear"></i> Platform Settings</a>
+<a href="/django-admin/" class="nav-link" target="_blank"><i class="bi bi-database"></i> Django Admin</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<div class="cad-notice-demo mb-4">
+  <i class="bi bi-shield-lock me-1"></i> <strong>Admin Panel</strong> — Role-based access enforced on backend. Only verified admins see this panel.
+</div>
+
+<!-- Stats Row 1 -->
+<div class="row g-3 mb-3">
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card">
+      <div class="cad-stat-value text-navy">{{ total_institutions }}</div>
+      <div class="cad-stat-label">Total Institutions</div>
+      {% if pending_verifications > 0 %}
+      <div class="small text-warning mt-1"><i class="bi bi-clock me-1"></i>{{ pending_verifications }} pending verification</div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card">
+      <div class="cad-stat-value text-navy">{{ total_orgs }}</div>
+      <div class="cad-stat-label">Organizations</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card">
+      <div class="cad-stat-value" style="color:var(--cad-green);">{{ active_facilities }}</div>
+      <div class="cad-stat-label">Active Facilities</div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card">
+      <div class="cad-stat-value text-navy">{{ total_bookings }}</div>
+      <div class="cad-stat-label">Total Bookings</div>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Row 2 — Revenue -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="cad-stat-card">
+      <div class="cad-stat-label mb-1">Gross Booking Value</div>
+      <div class="fw-800 text-navy fs-4">₹{{ gross_revenue|floatformat:0 }}</div>
+      <div class="text-muted small">All confirmed + completed bookings</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="cad-stat-card">
+      <div class="cad-stat-label mb-1">Platform Commission Earned</div>
+      <div class="fw-800 text-amber fs-4">₹{{ commission_revenue|floatformat:0 }}</div>
+      <div class="text-muted small">Current rate: {{ commission_rate }}%</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="cad-stat-card">
+      <div class="cad-stat-label mb-1">This Month Revenue</div>
+      <div class="fw-800 fs-4" style="color:var(--cad-green);">₹{{ monthly_revenue|floatformat:0 }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Activity Chart -->
+<div class="cad-form-card mb-4">
+  <h5 class="fw-700 mb-3"><i class="bi bi-graph-up-arrow me-2 text-amber"></i>Platform Activity — Last 6 Months</h5>
+  <div style="height:280px;">
+    <canvas id="adminChart"></canvas>
+  </div>
+</div>
+
+<div class="row g-4">
+  <!-- Pending Verifications -->
+  <div class="col-lg-6">
+    <div class="cad-table-wrapper">
+      <div class="d-flex justify-content-between align-items-center p-3">
+        <h5 class="fw-700 mb-0"><i class="bi bi-clock-history me-2 text-warning"></i>Pending Verifications</h5>
+        <a href="/dashboard/admin/institutions/?status=pending" class="btn btn-sm btn-outline-secondary">View All</a>
+      </div>
+      {% if pending_institutions %}
+      {% for inst in pending_institutions %}
+      <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
+        <div>
+          <div class="fw-600 small">{{ inst.name }}</div>
+          <div class="text-muted" style="font-size:0.75rem;">{{ inst.city }}, {{ inst.state }} — {{ inst.created_at|date:"d M Y" }}</div>
+        </div>
+        <div class="d-flex gap-1">
+          <form method="POST" action="/dashboard/admin/institutions/{{ inst.pk }}/action/">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="approve">
+            <button type="submit" class="btn btn-xs btn-success btn-sm py-0 px-2" style="font-size:0.75rem;" data-confirm="Approve {{ inst.name }}?">✓ Approve</button>
+          </form>
+          <a href="/dashboard/admin/institutions/?status=pending" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.75rem;">View</a>
+        </div>
+      </div>
+      {% endfor %}
+      {% else %}
+      <div class="text-center py-4 text-muted small"><i class="bi bi-check-circle me-1"></i>No pending verifications</div>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Bookings -->
+  <div class="col-lg-6">
+    <div class="cad-table-wrapper">
+      <div class="d-flex justify-content-between align-items-center p-3">
+        <h5 class="fw-700 mb-0"><i class="bi bi-calendar me-2 text-amber"></i>Recent Bookings</h5>
+        <a href="/dashboard/admin/bookings/" class="btn btn-sm btn-outline-secondary">View All</a>
+      </div>
+      <div class="table-responsive">
+        <table class="cad-table w-100">
+          <thead><tr><th>Ref</th><th>Facility</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for b in recent_bookings %}
+            <tr>
+              <td><a href="/bookings/{{ b.pk }}/" class="fw-600 text-navy">{{ b.reference_number }}</a></td>
+              <td class="small">{{ b.facility.name|truncatechars:22 }}</td>
+              <td class="fw-600 small">₹{{ b.subtotal|floatformat:0 }}</td>
+              <td><span class="cad-badge status-{{ b.status }}" style="font-size:0.7rem;">{{ b.get_status_display }}</span></td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="4" class="text-center py-3 text-muted small">No bookings yet</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Audit Logs -->
+{% if recent_logs %}
+<div class="cad-table-wrapper mt-4">
+  <div class="p-3"><h5 class="fw-700 mb-0"><i class="bi bi-journal-text me-2 text-amber"></i>Recent Audit Logs</h5></div>
+  <div class="table-responsive">
+    <table class="cad-table w-100">
+      <thead><tr><th>Action</th><th>By</th><th>Time</th></tr></thead>
+      <tbody>
+        {% for log in recent_logs %}
+        <tr>
+          <td class="small">{{ log.action }}</td>
+          <td class="small text-muted">{{ log.user.email|default:"System" }}</td>
+          <td class="small text-muted">{{ log.created_at|date:"d M Y g:i A" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+renderAdminChart(
+  'adminChart',
+  {{ chart_labels|safe }},
+  {{ chart_bookings|safe }},
+  {{ chart_revenue|safe }}
+);
+</script>
+{% endblock %}

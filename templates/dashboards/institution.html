@@ -1,0 +1,161 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% block title %}Institution Dashboard{% endblock %}
+{% block page_title %}Institution Dashboard{% endblock %}
+
+{% block sidebar_nav %}
+<div class="cad-sidebar-section">MANAGEMENT</div>
+<a href="/dashboard/institution/" class="nav-link"><i class="bi bi-speedometer2"></i> Dashboard</a>
+<a href="/facilities/manage/" class="nav-link"><i class="bi bi-building"></i> My Facilities</a>
+<a href="/facilities/manage/create/" class="nav-link"><i class="bi bi-plus-circle"></i> Add Facility</a>
+<a href="/bookings/manage/" class="nav-link"><i class="bi bi-calendar-check"></i> Bookings</a>
+<div class="cad-sidebar-section">ACCOUNT</div>
+<a href="/accounts/profile/" class="nav-link"><i class="bi bi-person"></i> Profile</a>
+<a href="/accounts/setup/" class="nav-link"><i class="bi bi-gear"></i> Institution Setup</a>
+{% endblock %}
+
+{% block dashboard_content %}
+<!-- Verification Warning -->
+{% if not profile.is_verified %}
+<div class="alert alert-warning d-flex align-items-center gap-2 mb-4">
+  <i class="bi bi-exclamation-triangle-fill fs-5"></i>
+  <div>Your institution is <strong>{{ profile.get_verification_status_display }}</strong>.
+  {% if profile.verification_status == 'pending' %} Admin review pending — you'll be notified.
+  {% elif profile.verification_status == 'rejected' %} Reason: {{ profile.rejection_reason }}. Please update documents.
+  {% endif %}
+  <a href="/accounts/setup/" class="ms-2">Update Details →</a></div>
+</div>
+{% endif %}
+
+<!-- Stats Row -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="cad-stat-value text-navy">{{ total_facilities }}</div>
+          <div class="cad-stat-label">Total Facilities</div>
+        </div>
+        <div class="cad-stat-icon" style="background:rgba(15,32,68,0.08);">
+          <i class="bi bi-building text-navy"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="cad-stat-value text-warning">{{ pending_requests }}</div>
+          <div class="cad-stat-label">Pending Requests</div>
+        </div>
+        <div class="cad-stat-icon" style="background:#fef3c7;">
+          <i class="bi bi-clock-history" style="color:#d97706;"></i>
+        </div>
+      </div>
+      {% if pending_requests > 0 %}
+      <a href="/bookings/manage/?status=pending" class="btn btn-sm btn-warning mt-2 w-100">Review Now</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="cad-stat-value" style="color:var(--cad-green);">{{ upcoming_bookings }}</div>
+          <div class="cad-stat-label">Upcoming Confirmed</div>
+        </div>
+        <div class="cad-stat-icon" style="background:#dcfce7;">
+          <i class="bi bi-calendar-check" style="color:var(--cad-green);"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="cad-stat-card">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="cad-stat-value text-amber">₹{{ monthly_revenue|floatformat:0 }}</div>
+          <div class="cad-stat-label">This Month Revenue</div>
+        </div>
+        <div class="cad-stat-icon" style="background:var(--cad-amber-light);">
+          <i class="bi bi-currency-rupee" style="color:var(--cad-amber-dark);"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Revenue breakdown -->
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="cad-stat-card text-center">
+      <div class="cad-stat-label mb-1">Gross Booking Value</div>
+      <div class="fw-800 text-navy fs-4">₹{{ monthly_revenue|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="cad-stat-card text-center">
+      <div class="cad-stat-label mb-1">Platform Commission</div>
+      <div class="fw-800 text-danger fs-4">− ₹{{ monthly_commission|floatformat:2 }}</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="cad-stat-card text-center border-success">
+      <div class="cad-stat-label mb-1">Your Estimated Payout</div>
+      <div class="fw-800 fs-4" style="color:var(--cad-green);">₹{{ monthly_payout|floatformat:2 }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Revenue Chart -->
+<div class="cad-form-card mb-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-700 mb-0"><i class="bi bi-bar-chart me-2 text-amber"></i>Revenue — Last 6 Months</h5>
+  </div>
+  <div style="height:280px;">
+    <canvas id="revenueChart"></canvas>
+  </div>
+</div>
+
+<!-- Recent Bookings -->
+<div class="cad-table-wrapper mb-4">
+  <div class="d-flex justify-content-between align-items-center p-3">
+    <h5 class="fw-700 mb-0"><i class="bi bi-calendar me-2 text-amber"></i>Recent Bookings</h5>
+    <a href="/bookings/manage/" class="btn btn-sm btn-outline-secondary">View All</a>
+  </div>
+  <div class="table-responsive">
+    <table class="cad-table w-100">
+      <thead>
+        <tr>
+          <th>Reference</th><th>Facility</th><th>Organization</th><th>Date</th><th>Amount</th><th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for booking in recent_bookings %}
+        <tr>
+          <td><a href="/bookings/{{ booking.pk }}/" class="fw-600 text-navy">{{ booking.reference_number }}</a></td>
+          <td>{{ booking.facility.name|truncatechars:25 }}</td>
+          <td>{{ booking.organization.name|truncatechars:20 }}</td>
+          <td>{{ booking.booked_date|date:"d M Y" }}</td>
+          <td class="fw-600">₹{{ booking.subtotal|floatformat:0 }}</td>
+          <td><span class="cad-badge status-{{ booking.status }} px-2 py-1">{{ booking.get_status_display }}</span></td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="text-center text-muted py-4">No bookings yet. <a href="/facilities/manage/create/">Create a facility</a> to start.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+renderRevenueChart(
+  'revenueChart',
+  {{ chart_labels|safe }},
+  {{ chart_revenue|safe }},
+  {{ chart_commission|safe }}
+);
+</script>
+{% endblock %}

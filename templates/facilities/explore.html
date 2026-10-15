@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}Explore Facilities{% endblock %}
+{% block content %}
+
+<div class="cad-page-hero">
+  <div class="container">
+    <h2 class="fw-800 text-navy mb-1">Explore Campus Facilities</h2>
+    <p class="text-muted mb-0">Discover verified venues from institutions across India</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <!-- Filter Bar -->
+  <form method="GET" class="cad-form-card mb-4">
+    <div class="row g-3 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Search</label>
+        {{ form.q }}
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">City</label>
+        {{ form.city }}
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Category</label>
+        {{ form.category }}
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Min Capacity</label>
+        {{ form.min_capacity }}
+      </div>
+      <div class="col-md-2">
+        <label class="form-label">Max ₹/hr</label>
+        {{ form.max_price }}
+      </div>
+      <div class="col-md-1">
+        <button type="submit" class="btn cad-btn-primary w-100">
+          <i class="bi bi-search"></i>
+        </button>
+      </div>
+    </div>
+    <div class="row g-3 mt-1 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label">Sort By</label>
+        {{ form.sort }}
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Date</label>
+        {{ form.date }}
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <a href="/facilities/" class="btn btn-outline-secondary">
+          <i class="bi bi-x-circle me-1"></i>Clear Filters
+        </a>
+      </div>
+    </div>
+  </form>
+
+  <!-- Results -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <span class="text-muted small"><strong>{{ total_count }}</strong> facilit{{ total_count|pluralize:"y,ies" }} found</span>
+    <div class="d-flex gap-2">
+      <button class="btn btn-sm btn-outline-secondary" onclick="setView('grid')" id="gridBtn"><i class="bi bi-grid-3x3-gap"></i></button>
+      <button class="btn btn-sm btn-outline-secondary" onclick="setView('list')" id="listBtn"><i class="bi bi-list"></i></button>
+    </div>
+  </div>
+
+  {% if page_obj %}
+  <div class="row g-4" id="facilityGrid">
+    {% for facility in page_obj %}
+    <div class="col-md-6 col-lg-4 facility-col">
+      <a href="/facilities/{{ facility.pk }}/" class="text-decoration-none">
+        <div class="cad-facility-card h-100">
+          {% if facility.primary_image %}
+            <img src="{{ facility.primary_image }}" class="cad-facility-img" alt="{{ facility.name }}" loading="lazy">
+          {% else %}
+            <div class="cad-facility-img-placeholder">
+              {% if facility.category == 'auditorium' %}🎭{% elif facility.category == 'computer_lab' %}💻{% elif facility.category == 'sports_ground' %}⚽{% elif facility.category == 'indoor_sports' %}🏸{% else %}🏫{% endif %}
+            </div>
+          {% endif %}
+          <div class="cad-card-body">
+            <div class="d-flex justify-content-between align-items-start mb-1">
+              <span class="cad-badge cad-badge-navy small">{{ facility.get_category_display }}</span>
+              <span class="text-muted" style="font-size:0.75rem;"><i class="bi bi-eye me-1"></i>{{ facility.view_count }}</span>
+            </div>
+            <h6 class="fw-700 mt-2 mb-1 text-navy">{{ facility.name }}</h6>
+            <p class="text-muted mb-1" style="font-size:0.8rem;"><i class="bi bi-building me-1"></i>{{ facility.institution.name|truncatechars:35 }}</p>
+            <p class="text-muted mb-2" style="font-size:0.8rem;"><i class="bi bi-geo-alt me-1"></i>{{ facility.city }}, {{ facility.state }}</p>
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="cad-price-tag">{{ facility.formatted_price }}<span class="text-muted fw-400 small">/{{ facility.get_pricing_model_display }}</span></span>
+              <span class="text-muted small"><i class="bi bi-people me-1"></i>Up to {{ facility.capacity }}</span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-5 d-flex justify-content-center" aria-label="Facility pages">
+    <ul class="pagination">
+      {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">&laquo;</a></li>
+      {% endif %}
+      {% for num in page_obj.paginator.page_range %}
+        {% if page_obj.number == num %}
+          <li class="page-item active"><span class="page-link" style="background:var(--cad-navy);border-color:var(--cad-navy);">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+          <li class="page-item"><a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ num }}">{{ num }}</a></li>
+        {% endif %}
+      {% endfor %}
+      {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?{% for k,v in request.GET.items %}{% if k != 'page' %}{{ k }}={{ v }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">&raquo;</a></li>
+      {% endif %}
+    </ul>
+  </nav>
+  {% endif %}
+
+  {% else %}
+  <div class="text-center py-5">
+    <i class="bi bi-building display-2 text-muted"></i>
+    <h5 class="mt-3 text-muted">No facilities found</h5>
+    <p class="text-muted small">Try adjusting your search filters or <a href="/facilities/">clear all filters</a>.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+function setView(mode) {
+  var grid = document.getElementById('facilityGrid');
+  var cols = grid.querySelectorAll('.facility-col');
+  if (mode === 'list') {
+    cols.forEach(c => c.className = 'col-12 facility-col');
+  } else {
+    cols.forEach(c => c.className = 'col-md-6 col-lg-4 facility-col');
+  }
+}
+</script>
+{% endblock %}
