@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}Complete Payment — {{ booking.reference_number }}{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:600px;">
+  <div class="cad-form-card">
+    <div class="text-center mb-4">
+      <div style="width:64px;height:64px;background:var(--cad-amber-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;margin:0 auto 1rem;">💳</div>
+      <h3 class="fw-800 text-navy">Complete Payment</h3>
+      <p class="text-muted">Booking {{ booking.reference_number }}</p>
+    </div>
+
+    <div class="cad-notice-demo mb-4">
+      <strong><i class="bi bi-shield-exclamation me-1"></i>DEMO PAYMENT MODE</strong><br>
+      This is a simulated payment. No real money is charged. Use the buttons below to simulate a successful or failed payment.
+    </div>
+
+    <!-- Price Summary -->
+    <div class="cad-price-breakdown mb-4">
+      <div class="breakdown-row"><span class="fw-600">Facility</span><span class="fw-600">{{ booking.facility.name }}</span></div>
+      <div class="breakdown-row"><span>Date</span><span>{{ booking.booked_date|date:"d M Y" }}</span></div>
+      <div class="breakdown-row"><span>Time</span><span>{{ booking.start_time|time:"g:i A" }} – {{ booking.end_time|time:"g:i A" }}</span></div>
+      <div class="breakdown-row"><span>Duration</span><span>{{ booking.duration_display }}</span></div>
+      <div class="breakdown-row"><span>Subtotal</span><span>₹{{ booking.subtotal|floatformat:2 }}</span></div>
+      <div class="breakdown-row text-muted"><span>Platform Commission ({{ booking.commission_rate }}%)</span><span>₹{{ booking.commission_amount|floatformat:2 }}</span></div>
+      <div class="breakdown-row text-muted"><span>Institution Receives</span><span>₹{{ booking.institution_payout|floatformat:2 }}</span></div>
+      <div class="breakdown-total"><span>Amount to Pay</span><span class="text-amber fs-5">₹{{ booking.total_amount|floatformat:2 }}</span></div>
+    </div>
+
+    <!-- Demo Payment Buttons -->
+    <form method="POST" action="/bookings/{{ booking.pk }}/payment/process/" class="d-grid gap-3">
+      {% csrf_token %}
+      <input type="hidden" name="simulate_failure" value="0">
+      <button type="submit" class="btn cad-btn-primary btn-lg">
+        <i class="bi bi-check-circle me-2"></i>Simulate Successful Payment ₹{{ booking.total_amount|floatformat:0 }}
+      </button>
+    </form>
+
+    <form method="POST" action="/bookings/{{ booking.pk }}/payment/process/" class="d-grid mt-2">
+      {% csrf_token %}
+      <input type="hidden" name="simulate_failure" value="1">
+      <button type="submit" class="btn btn-outline-danger btn-sm">
+        <i class="bi bi-x-circle me-1"></i>Simulate Payment Failure (for testing)
+      </button>
+    </form>
+
+    <div class="text-center mt-4">
+      <a href="/bookings/{{ booking.pk }}/" class="text-muted small">← Back to booking details</a>
+    </div>
+
+    <div class="cad-notice-info mt-4 small">
+      <i class="bi bi-info-circle me-1"></i>
+      <strong>Razorpay / Payment Gateway Integration:</strong> To accept real payments, configure <code>RAZORPAY_KEY_ID</code> and <code>RAZORPAY_KEY_SECRET</code> in your <code>.env</code> file. See <code>SETUP.md</code> for instructions.
+    </div>
+  </div>
+</div>
+{% endblock %}

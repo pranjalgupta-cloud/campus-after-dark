@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Booking Requests{% endblock %}
+{% block content %}
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-800 text-navy mb-0">Booking Requests</h3>
+    <a href="/dashboard/institution/" class="btn btn-outline-secondary btn-sm">← Dashboard</a>
+  </div>
+  <div class="d-flex gap-2 mb-4 flex-wrap">
+    <a href="/bookings/manage/" class="btn btn-sm {% if not status_filter %}cad-btn-navy{% else %}btn-outline-secondary{% endif %}">All</a>
+    {% for val, label in status_choices %}
+    <a href="?status={{ val }}" class="btn btn-sm {% if status_filter == val %}cad-btn-navy{% else %}btn-outline-secondary{% endif %}">{{ label }}</a>
+    {% endfor %}
+  </div>
+  <div class="cad-table-wrapper">
+    <div class="table-responsive">
+      <table class="cad-table w-100">
+        <thead>
+          <tr><th>Reference</th><th>Facility</th><th>Organization</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for booking in page_obj %}
+          <tr>
+            <td><a href="/bookings/{{ booking.pk }}/" class="fw-600 text-navy">{{ booking.reference_number }}</a></td>
+            <td class="small">{{ booking.facility.name|truncatechars:22 }}</td>
+            <td class="small">{{ booking.organization.name|truncatechars:20 }}</td>
+            <td class="small">{{ booking.booked_date|date:"d M Y" }}<br><span class="text-muted">{{ booking.start_time|time:"g:i A" }} – {{ booking.end_time|time:"g:i A" }}</span></td>
+            <td class="fw-600 small">₹{{ booking.subtotal|floatformat:0 }}</td>
+            <td><span class="cad-badge status-{{ booking.status }}" style="font-size:0.7rem;">{{ booking.get_status_display }}</span></td>
+            <td>
+              <div class="d-flex gap-1 flex-wrap">
+                {% if booking.status == 'pending' %}
+                <form method="POST" action="/bookings/{{ booking.pk }}/approve/">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-success py-0" data-confirm="Approve this request?">Approve</button>
+                </form>
+                <button type="button" class="btn btn-sm btn-danger py-0" data-bs-toggle="modal" data-bs-target="#rejectM{{ booking.pk }}">Reject</button>
+                <div class="modal fade" id="rejectM{{ booking.pk }}" tabindex="-1">
+                  <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                      <div class="modal-header"><h5 class="modal-title fw-700">Reject Booking</h5><button class="btn-close" data-bs-dismiss="modal"></button></div>
+                      <form method="POST" action="/bookings/{{ booking.pk }}/reject/">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                          <label class="form-label">Reason *</label>
+                          <textarea name="reason" class="form-control" rows="3" required></textarea>
+                        </div>
+                        <div class="modal-footer">
+                          <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button class="btn btn-danger">Reject</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                {% elif booking.status == 'confirmed' %}
+                <form method="POST" action="/bookings/{{ booking.pk }}/complete/">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-primary py-0" data-confirm="Mark as completed?">Complete</button>
+                </form>
+                {% endif %}
+                <a href="/bookings/{{ booking.pk }}/" class="btn btn-sm btn-outline-secondary py-0">View</a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="7" class="text-center py-4 text-muted">No bookings found.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% if page_obj.has_other_pages %}
+  <nav class="mt-4 d-flex justify-content-center"><ul class="pagination">
+    {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">&laquo;</a></li>{% endif %}
+    <li class="page-item active"><span class="page-link" style="background:var(--cad-navy);">{{ page_obj.number }}</span></li>
+    {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">&raquo;</a></li>{% endif %}
+  </ul></nav>
+  {% endif %}
+</div>
+{% endblock %}

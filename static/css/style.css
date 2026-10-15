@@ -1,0 +1,511 @@
+/* ═══════════════════════════════════════════════════════════════════
+   Campus After Dark — Custom Styles
+   Color palette: Deep Navy #0f2044, Amber #f59e0b, White/Light Gray
+   ═══════════════════════════════════════════════════════════════════ */
+
+:root {
+  --cad-navy: #0f2044;
+  --cad-navy-dark: #0a1830;
+  --cad-navy-mid: #1a3460;
+  --cad-amber: #f59e0b;
+  --cad-amber-dark: #d97706;
+  --cad-amber-light: #fef3c7;
+  --cad-gray-50: #f8fafc;
+  --cad-gray-100: #f1f5f9;
+  --cad-gray-200: #e2e8f0;
+  --cad-gray-400: #94a3b8;
+  --cad-gray-600: #475569;
+  --cad-gray-800: #1e293b;
+  --cad-green: #059669;
+  --cad-red: #dc2626;
+  --cad-blue: #2563eb;
+}
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--cad-gray-800);
+  background: #fff;
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* ── Navbar ───────────────────────────────────────────────────────── */
+.cad-navbar {
+  background: var(--cad-navy) !important;
+  padding: 0.75rem 0;
+  border-bottom: 3px solid var(--cad-amber);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+.cad-brand {
+  font-weight: 800;
+  font-size: 1.2rem;
+  letter-spacing: -0.3px;
+  color: #fff !important;
+}
+.cad-brand i { color: var(--cad-amber); }
+.cad-navbar .nav-link {
+  color: rgba(255,255,255,0.85) !important;
+  font-weight: 500;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.75rem !important;
+  transition: color 0.2s;
+}
+.cad-navbar .nav-link:hover { color: var(--cad-amber) !important; }
+.cad-dropdown { border: none; box-shadow: 0 8px 32px rgba(0,0,0,0.12); border-radius: 12px; }
+.cad-avatar-sm {
+  width: 28px; height: 28px;
+  background: var(--cad-amber);
+  color: var(--cad-navy);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Buttons ──────────────────────────────────────────────────────── */
+.cad-btn-primary {
+  background: var(--cad-amber);
+  color: var(--cad-navy);
+  border: none;
+  font-weight: 700;
+  border-radius: 8px;
+  transition: background 0.2s, transform 0.1s;
+}
+.cad-btn-primary:hover { background: var(--cad-amber-dark); color: var(--cad-navy); transform: translateY(-1px); }
+.cad-btn-navy {
+  background: var(--cad-navy);
+  color: #fff;
+  border: none;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.cad-btn-navy:hover { background: var(--cad-navy-mid); color: #fff; }
+.cad-btn-outline {
+  background: transparent;
+  color: var(--cad-navy);
+  border: 2px solid var(--cad-navy);
+  font-weight: 600;
+  border-radius: 8px;
+}
+.cad-btn-outline:hover { background: var(--cad-navy); color: #fff; }
+
+/* ── Hero Section ─────────────────────────────────────────────────── */
+.cad-hero {
+  background: linear-gradient(135deg, var(--cad-navy) 0%, var(--cad-navy-mid) 60%, #1e4080 100%);
+  color: #fff;
+  padding: 5rem 0 4rem;
+  position: relative;
+  overflow: hidden;
+}
+.cad-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+}
+.cad-hero-title { font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.1; }
+.cad-hero-subtitle { font-size: 1.15rem; opacity: 0.85; max-width: 560px; }
+.text-amber { color: var(--cad-amber) !important; }
+
+/* ── Search Panel ─────────────────────────────────────────────────── */
+.cad-search-panel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+}
+.cad-search-panel .form-control,
+.cad-search-panel .form-select {
+  border-radius: 8px;
+  border-color: var(--cad-gray-200);
+  padding: 0.6rem 0.85rem;
+}
+.cad-search-panel .form-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--cad-gray-600);
+  margin-bottom: 0.3rem;
+}
+
+/* ── Cards ────────────────────────────────────────────────────────── */
+.cad-facility-card {
+  border: 1px solid var(--cad-gray-200);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background: #fff;
+}
+.cad-facility-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.1); }
+.cad-facility-img {
+  height: 210px;
+  object-fit: cover;
+  width: 100%;
+  background: var(--cad-gray-100);
+}
+.cad-facility-img-placeholder {
+  height: 210px;
+  background: linear-gradient(135deg, var(--cad-gray-100), var(--cad-gray-200));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 3rem; color: var(--cad-gray-400);
+}
+.cad-card-body { padding: 1.1rem; }
+.cad-price-tag {
+  color: var(--cad-amber-dark);
+  font-weight: 800;
+  font-size: 1.1rem;
+}
+.cad-badge {
+  font-size: 0.7rem; font-weight: 600; padding: 0.3em 0.65em;
+  border-radius: 20px; letter-spacing: 0.04em;
+}
+.cad-badge-navy { background: var(--cad-navy); color: #fff; }
+.cad-badge-amber { background: var(--cad-amber-light); color: var(--cad-amber-dark); }
+.cad-badge-green { background: #dcfce7; color: var(--cad-green); }
+.cad-badge-red { background: #fee2e2; color: var(--cad-red); }
+.cad-badge-gray { background: var(--cad-gray-100); color: var(--cad-gray-600); }
+.cad-badge-blue { background: #dbeafe; color: var(--cad-blue); }
+
+/* ── Stat Cards ───────────────────────────────────────────────────── */
+.cad-stat-card {
+  background: #fff;
+  border: 1px solid var(--cad-gray-200);
+  border-radius: 14px;
+  padding: 1.4rem;
+  transition: box-shadow 0.2s;
+}
+.cad-stat-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+.cad-stat-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.4rem;
+}
+.cad-stat-value { font-size: 1.9rem; font-weight: 800; line-height: 1.1; }
+.cad-stat-label { font-size: 0.82rem; color: var(--cad-gray-600); font-weight: 500; }
+
+/* ── Dashboard Sidebar ───────────────────────────────────────────── */
+.cad-sidebar {
+  background: var(--cad-navy);
+  min-height: 100vh;
+  width: 260px;
+  position: fixed;
+  top: 0; left: 0;
+  overflow-y: auto;
+  z-index: 1040;
+  transition: transform 0.3s;
+}
+.cad-sidebar-brand {
+  padding: 1.2rem 1.4rem;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  font-weight: 800;
+  color: #fff;
+  font-size: 1rem;
+}
+.cad-sidebar-brand i { color: var(--cad-amber); }
+.cad-sidebar .nav-link {
+  color: rgba(255,255,255,0.75);
+  padding: 0.65rem 1.4rem;
+  font-weight: 500;
+  font-size: 0.88rem;
+  border-radius: 0;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 0.6rem;
+}
+.cad-sidebar .nav-link:hover,
+.cad-sidebar .nav-link.active {
+  color: #fff;
+  background: rgba(255,255,255,0.08);
+  border-left: 3px solid var(--cad-amber);
+  padding-left: calc(1.4rem - 3px);
+}
+.cad-sidebar-section,
+.cad-sidebar .nav-section { 
+  padding: 0.6rem 1.4rem 0.3rem;
+  font-size: 0.7rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.08em;
+  color: rgba(255,255,255,0.35);
+  margin-top: 0.5rem;
+}
+.cad-main-content {
+  margin-left: 260px;
+  padding: 2rem;
+  min-height: 100vh;
+  background: var(--cad-gray-50);
+}
+
+/* ── Dashboard Top Bar ───────────────────────────────────────────── */
+.cad-topbar {
+  background: #fff;
+  border-bottom: 1px solid var(--cad-gray-200);
+  padding: 0.75rem 2rem;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 100;
+  margin: -2rem -2rem 2rem;
+}
+.cad-topbar-title { font-size: 1.1rem; font-weight: 700; color: var(--cad-navy); }
+
+/* ── Tables ───────────────────────────────────────────────────────── */
+.cad-table { border-collapse: separate; border-spacing: 0; width: 100%; }
+.cad-table th {
+  background: var(--cad-gray-50);
+  font-size: 0.78rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em;
+  color: var(--cad-gray-600);
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--cad-gray-200);
+}
+.cad-table td {
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--cad-gray-100);
+  vertical-align: middle;
+  font-size: 0.9rem;
+}
+.cad-table tr:hover td { background: var(--cad-gray-50); }
+.cad-table-wrapper {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid var(--cad-gray-200);
+  overflow: hidden;
+}
+
+/* ── Forms ────────────────────────────────────────────────────────── */
+.cad-form-card {
+  background: #fff;
+  border: 1px solid var(--cad-gray-200);
+  border-radius: 14px;
+  padding: 2rem;
+}
+.form-control, .form-select {
+  border-color: var(--cad-gray-200);
+  border-radius: 8px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.92rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus, .form-select:focus {
+  border-color: var(--cad-navy);
+  box-shadow: 0 0 0 3px rgba(15,32,68,0.1);
+}
+.form-label { font-weight: 600; font-size: 0.88rem; margin-bottom: 0.35rem; }
+.form-text { font-size: 0.8rem; color: var(--cad-gray-600); }
+
+/* ── Alert / Notice boxes ─────────────────────────────────────────── */
+.cad-notice-demo {
+  background: var(--cad-amber-light);
+  border-left: 4px solid var(--cad-amber);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: #78350f;
+}
+.cad-notice-info {
+  background: #dbeafe;
+  border-left: 4px solid var(--cad-blue);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: #1e40af;
+}
+
+/* ── Status Badges ────────────────────────────────────────────────── */
+.status-pending { background: #fef3c7; color: #92400e; }
+.status-approved_awaiting_payment { background: #dbeafe; color: #1e40af; }
+.status-confirmed { background: #dcfce7; color: #14532d; }
+.status-rejected { background: #fee2e2; color: #7f1d1d; }
+.status-cancelled { background: #f1f5f9; color: #475569; }
+.status-completed { background: #f0fdf4; color: #14532d; border: 1px solid #bbf7d0; }
+.status-payment_failed { background: #fee2e2; color: #7f1d1d; }
+
+/* ── Booking Price Breakdown ──────────────────────────────────────── */
+.cad-price-breakdown {
+  background: var(--cad-gray-50);
+  border: 1px solid var(--cad-gray-200);
+  border-radius: 12px;
+  padding: 1.2rem;
+}
+.cad-price-breakdown .breakdown-row {
+  display: flex; justify-content: space-between;
+  padding: 0.4rem 0; font-size: 0.9rem;
+  border-bottom: 1px solid var(--cad-gray-200);
+}
+.cad-price-breakdown .breakdown-total {
+  display: flex; justify-content: space-between;
+  padding: 0.6rem 0 0; font-weight: 800;
+  font-size: 1.05rem; color: var(--cad-navy);
+}
+
+/* ── Auth Pages ───────────────────────────────────────────────────── */
+.cad-auth-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--cad-navy) 0%, var(--cad-navy-mid) 100%);
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem 1rem;
+}
+.cad-auth-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+}
+.cad-auth-logo { font-size: 1.4rem; font-weight: 800; color: var(--cad-navy); }
+.cad-auth-logo i { color: var(--cad-amber); }
+
+/* ── Section Headings ─────────────────────────────────────────────── */
+.cad-section-title {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800; color: var(--cad-navy);
+  line-height: 1.2;
+}
+.cad-section-sub { color: var(--cad-gray-600); font-size: 1.05rem; }
+.cad-divider-amber {
+  width: 52px; height: 4px;
+  background: var(--cad-amber); border-radius: 2px;
+  margin: 0.75rem 0 1.2rem;
+}
+
+/* ── Category Cards ───────────────────────────────────────────────── */
+.cad-category-card {
+  background: #fff;
+  border: 1px solid var(--cad-gray-200);
+  border-radius: 14px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: block;
+  color: var(--cad-gray-800);
+}
+.cad-category-card:hover {
+  border-color: var(--cad-amber);
+  background: var(--cad-amber-light);
+  transform: translateY(-3px);
+  color: var(--cad-navy);
+}
+.cad-category-icon {
+  font-size: 2.2rem; margin-bottom: 0.6rem;
+  color: var(--cad-navy);
+}
+.cad-category-card:hover .cad-category-icon { color: var(--cad-amber-dark); }
+
+/* ── Stats Section ────────────────────────────────────────────────── */
+.cad-stats-section {
+  background: var(--cad-navy);
+  color: #fff; padding: 4rem 0;
+}
+.cad-big-stat { font-size: 2.8rem; font-weight: 800; color: var(--cad-amber); }
+.cad-big-stat-label { font-size: 0.9rem; opacity: 0.75; font-weight: 500; }
+
+/* ── Process Steps ────────────────────────────────────────────────── */
+.cad-step-number {
+  width: 44px; height: 44px;
+  background: var(--cad-amber);
+  color: var(--cad-navy);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* ── Image Gallery ────────────────────────────────────────────────── */
+.cad-gallery-main { border-radius: 14px; overflow: hidden; height: 400px; }
+.cad-gallery-main img { width: 100%; height: 100%; object-fit: cover; }
+.cad-gallery-thumb { border-radius: 8px; overflow: hidden; cursor: pointer; height: 90px; }
+.cad-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.2s; }
+.cad-gallery-thumb:hover img { opacity: 0.8; }
+
+/* ── Amenity Pill ─────────────────────────────────────────────────── */
+.cad-amenity-pill {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  background: var(--cad-gray-100);
+  color: var(--cad-gray-800);
+  border-radius: 20px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.82rem; font-weight: 500;
+}
+
+/* ── Notification Bell ────────────────────────────────────────────── */
+.cad-notif-badge {
+  position: absolute; top: 2px; right: 2px;
+  width: 8px; height: 8px;
+  background: var(--cad-amber); border-radius: 50%;
+}
+
+/* ── Footer ───────────────────────────────────────────────────────── */
+.cad-footer {
+  background: var(--cad-navy-dark);
+  color: rgba(255,255,255,0.8);
+}
+.cad-footer-link {
+  color: rgba(255,255,255,0.6);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.cad-footer-link:hover { color: var(--cad-amber); }
+.cad-social-link {
+  color: rgba(255,255,255,0.6);
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.cad-social-link:hover { color: var(--cad-amber); }
+
+/* ── Messages bar ─────────────────────────────────────────────────── */
+.cad-messages-bar { padding: 0.5rem 0; }
+
+/* ── Page hero ────────────────────────────────────────────────────── */
+.cad-page-hero {
+  background: var(--cad-gray-50);
+  border-bottom: 1px solid var(--cad-gray-200);
+  padding: 2.5rem 0 2rem;
+}
+
+/* ── Misc ─────────────────────────────────────────────────────────── */
+.cursor-pointer { cursor: pointer; }
+.bg-amber { background: var(--cad-amber) !important; }
+.bg-navy { background: var(--cad-navy) !important; }
+.border-amber { border-color: var(--cad-amber) !important; }
+.fw-800 { font-weight: 800; }
+
+/* Star rating display */
+.cad-stars { color: var(--cad-amber); }
+
+/* Verification badge */
+.cad-verified { color: var(--cad-green); font-size: 0.82rem; font-weight: 600; }
+.cad-pending { color: #d97706; font-size: 0.82rem; font-weight: 600; }
+
+/* Breadcrumb */
+.cad-breadcrumb .breadcrumb-item a { color: var(--cad-navy); text-decoration: none; }
+.cad-breadcrumb .breadcrumb-item.active { color: var(--cad-gray-600); }
+
+/* ── Responsive Dashboard ─────────────────────────────────────────── */
+@media (max-width: 991.98px) {
+  .cad-sidebar { transform: translateX(-100%); }
+  .cad-sidebar.show { transform: translateX(0); }
+  .cad-main-content { margin-left: 0; padding: 1rem; }
+  .cad-topbar { margin: -1rem -1rem 1rem; padding: 0.75rem 1rem; }
+}
+
+/* ── Animations ───────────────────────────────────────────────────── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up { animation: fadeInUp 0.4s ease-out; }
+
+/* ── Loading spinner ──────────────────────────────────────────────── */
+.cad-spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--cad-gray-200);
+  border-top-color: var(--cad-amber);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Complete Your Institution Setup{% endblock %}
+{% block content %}
+<div class="container py-5" style="max-width:800px;">
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <div style="width:48px;height:48px;background:var(--cad-amber);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;">🏛️</div>
+    <div>
+      <h3 class="fw-800 mb-0 text-navy">Institution Setup</h3>
+      <p class="text-muted small mb-0">Complete your profile and upload verification documents</p>
+    </div>
+  </div>
+
+  <!-- Verification Status Banner -->
+  {% if profile.verification_status == 'pending' %}
+  <div class="cad-notice-info mb-4">
+    <i class="bi bi-clock-history me-2"></i><strong>Verification Pending</strong> — Your institution is awaiting admin review. You'll be notified once approved. This usually takes 24–48 hours.
+  </div>
+  {% elif profile.verification_status == 'approved' %}
+  <div class="alert alert-success mb-4">
+    <i class="bi bi-check-circle-fill me-2"></i><strong>Verified!</strong> Your institution is approved. You can now create and publish facilities.
+    <a href="/facilities/manage/create/" class="ms-2 btn btn-sm btn-success">Create First Facility</a>
+  </div>
+  {% elif profile.verification_status == 'rejected' %}
+  <div class="alert alert-danger mb-4">
+    <i class="bi bi-x-circle me-2"></i><strong>Verification Rejected.</strong> Reason: {{ profile.rejection_reason|default:"Not specified" }}. Please update your documents and contact support.
+  </div>
+  {% endif %}
+
+  <!-- Profile Form -->
+  <div class="cad-form-card mb-4">
+    <h5 class="fw-700 mb-4"><i class="bi bi-building me-2 text-amber"></i>Institution Details</h5>
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-8">
+          <label class="form-label">Institution Name *</label>
+          {{ profile_form.name }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Type</label>
+          {{ profile_form.institution_type }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Registration Number</label>
+          {{ profile_form.registration_number }}
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Website</label>
+          {{ profile_form.website }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Address</label>
+          {{ profile_form.address }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">City *</label>
+          {{ profile_form.city }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">State *</label>
+          {{ profile_form.state }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">PIN Code</label>
+          {{ profile_form.pincode }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Description</label>
+          {{ profile_form.description }}
+        </div>
+        <div class="col-12">
+          <label class="form-label">Institution Logo</label>
+          {{ profile_form.logo }}
+        </div>
+      </div>
+      <button type="submit" name="save_profile" class="btn cad-btn-navy mt-4">
+        <i class="bi bi-save me-1"></i> Save Profile
+      </button>
+    </form>
+  </div>
+
+  <!-- Document Upload -->
+  <div class="cad-form-card mb-4">
+    <h5 class="fw-700 mb-2"><i class="bi bi-file-earmark-text me-2 text-amber"></i>Verification Documents</h5>
+    <p class="text-muted small mb-4">Upload at least one official document (Registration Certificate, Tax Document, or Identity Proof) for admin verification.</p>
+
+    {% if documents %}
+    <div class="mb-4">
+      <h6 class="fw-600 small text-muted text-uppercase mb-2">Uploaded Documents</h6>
+      {% for doc in documents %}
+      <div class="d-flex align-items-center justify-content-between p-3 border rounded mb-2 bg-white">
+        <div>
+          <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+          <strong class="small">{{ doc.title }}</strong>
+          <span class="cad-badge cad-badge-gray ms-2">{{ doc.get_doc_type_display }}</span>
+        </div>
+        <span class="text-muted" style="font-size:0.78rem;">{{ doc.uploaded_at|date:"d M Y" }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="POST" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Document Type *</label>
+          {{ doc_form.doc_type }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Title *</label>
+          {{ doc_form.title }}
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">File (PDF/Image, max 5MB) *</label>
+          {{ doc_form.file }}
+        </div>
+      </div>
+      <button type="submit" name="upload_doc" class="btn cad-btn-primary mt-3">
+        <i class="bi bi-upload me-1"></i> Upload Document
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% block title %}Booking {{ booking.reference_number }}{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:860px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h3 class="fw-800 text-navy mb-0">Booking {{ booking.reference_number }}</h3>
+      <p class="text-muted small mb-0">{{ booking.facility.name }}</p>
+    </div>
+    <span class="cad-badge status-{{ booking.status }} px-3 py-2" style="font-size:0.85rem;">
+      {{ booking.get_status_display }}
+    </span>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <!-- Booking Details -->
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-3"><i class="bi bi-calendar-event me-2 text-amber"></i>Booking Details</h5>
+        <table class="table table-sm table-borderless">
+          <tr><td class="text-muted" width="45%">Facility</td><td class="fw-600"><a href="/facilities/{{ booking.facility.pk }}/" class="text-navy">{{ booking.facility.name }}</a></td></tr>
+          <tr><td class="text-muted">Institution</td><td class="fw-600">{{ booking.facility.institution.name }}</td></tr>
+          <tr><td class="text-muted">Date</td><td class="fw-600">{{ booking.booked_date|date:"l, d F Y" }}</td></tr>
+          <tr><td class="text-muted">Time</td><td class="fw-600">{{ booking.start_time|time:"g:i A" }} – {{ booking.end_time|time:"g:i A" }} ({{ booking.duration_display }})</td></tr>
+          <tr><td class="text-muted">Attendees</td><td class="fw-600">{{ booking.attendee_count }}</td></tr>
+          <tr><td class="text-muted">Purpose</td><td class="fw-600">{{ booking.purpose }}</td></tr>
+          {% if booking.additional_requirements %}
+          <tr><td class="text-muted">Requirements</td><td class="fw-600">{{ booking.additional_requirements }}</td></tr>
+          {% endif %}
+          {% if booking.rejection_reason %}
+          <tr><td class="text-muted">Rejection Reason</td><td class="text-danger fw-600">{{ booking.rejection_reason }}</td></tr>
+          {% endif %}
+          {% if booking.cancellation_reason %}
+          <tr><td class="text-muted">Cancellation Reason</td><td class="text-muted fw-600">{{ booking.cancellation_reason }}</td></tr>
+          {% endif %}
+        </table>
+      </div>
+
+      <!-- Price Breakdown -->
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-3"><i class="bi bi-receipt me-2 text-amber"></i>Price Breakdown</h5>
+        <div class="cad-price-breakdown">
+          <div class="breakdown-row"><span>{{ booking.hours_booked }} hrs × ₹{{ booking.price_per_hour|floatformat:2 }}/hr</span><span>₹{{ booking.subtotal|floatformat:2 }}</span></div>
+          <div class="breakdown-row text-muted"><span>Platform Commission ({{ booking.commission_rate }}%)</span><span>₹{{ booking.commission_amount|floatformat:2 }}</span></div>
+          <div class="breakdown-row text-muted"><span>Institution Payout</span><span>₹{{ booking.institution_payout|floatformat:2 }}</span></div>
+          <div class="breakdown-total"><span>Total Payable</span><span>₹{{ booking.total_amount|floatformat:2 }}</span></div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-3"><i class="bi bi-gear me-2 text-amber"></i>Actions</h5>
+        <div class="d-flex flex-wrap gap-2">
+          <!-- Org: Pay -->
+          {% if user.is_org and booking.status == 'approved_awaiting_payment' %}
+          <a href="/bookings/{{ booking.pk }}/payment/" class="btn cad-btn-primary">
+            <i class="bi bi-credit-card me-1"></i> Complete Payment
+          </a>
+          {% endif %}
+
+          <!-- Institution: Approve/Reject -->
+          {% if user.is_institution and booking.status == 'pending' %}
+          <form method="POST" action="/bookings/{{ booking.pk }}/approve/">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" data-confirm="Approve this booking request?">
+              <i class="bi bi-check-circle me-1"></i> Approve
+            </button>
+          </form>
+          <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal">
+            <i class="bi bi-x-circle me-1"></i> Reject
+          </button>
+          {% endif %}
+
+          <!-- Institution: Mark Complete -->
+          {% if user.is_institution and booking.status == 'confirmed' %}
+          <form method="POST" action="/bookings/{{ booking.pk }}/complete/">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success" data-confirm="Mark this booking as completed?">
+              <i class="bi bi-check2-all me-1"></i> Mark Completed
+            </button>
+          </form>
+          {% endif %}
+
+          <!-- Cancel -->
+          {% if booking.status in 'pending,approved_awaiting_payment,confirmed' %}
+          <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelModal">
+            <i class="bi bi-x me-1"></i> Cancel Booking
+          </button>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Status History -->
+      <div class="cad-form-card">
+        <h5 class="fw-700 mb-3"><i class="bi bi-clock-history me-2 text-amber"></i>Status History</h5>
+        {% for h in history %}
+        <div class="d-flex gap-3 mb-3 {% if not forloop.last %}border-bottom pb-3{% endif %}">
+          <div class="mt-1"><i class="bi bi-arrow-right-circle text-amber"></i></div>
+          <div>
+            <span class="fw-600 small">{{ h.to_status|title|replace:"_," " " }}</span>
+            {% if h.note %}<span class="text-muted small ms-2">— {{ h.note }}</span>{% endif %}
+            <div class="text-muted" style="font-size:0.75rem;">{{ h.changed_at|date:"d M Y, g:i A" }}{% if h.changed_by %} by {{ h.changed_by.get_full_name|default:h.changed_by.email }}{% endif %}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <!-- Review (for completed bookings) -->
+      {% if review_form %}
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-3"><i class="bi bi-star me-2 text-amber"></i>Leave a Review</h5>
+        <form method="POST" action="/bookings/{{ booking.pk }}/review/">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label">Rating</label>
+            {{ review_form.rating }}
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Comment</label>
+            {{ review_form.comment }}
+          </div>
+          <button type="submit" class="btn cad-btn-primary w-100">Submit Review</button>
+        </form>
+      </div>
+      {% elif existing_review %}
+      <div class="cad-form-card mb-4">
+        <h5 class="fw-700 mb-2"><i class="bi bi-star-fill text-amber me-2"></i>Your Review</h5>
+        <div class="cad-stars mb-1">{% for i in "12345" %}{% if forloop.counter <= existing_review.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+        <p class="text-muted small">{{ existing_review.comment }}</p>
+      </div>
+      {% endif %}
+
+      <!-- Facility Card -->
+      <div class="cad-form-card">
+        <a href="/facilities/{{ booking.facility.pk }}/" class="text-decoration-none">
+          {% if booking.facility.primary_image %}
+          <img src="{{ booking.facility.primary_image }}" class="rounded mb-3 w-100" style="height:150px;object-fit:cover;" alt="">
+          {% endif %}
+        </a>
+        <h6 class="fw-700 text-navy">{{ booking.facility.name }}</h6>
+        <p class="text-muted small mb-1"><i class="bi bi-geo-alt me-1"></i>{{ booking.facility.city }}, {{ booking.facility.state }}</p>
+        <p class="text-muted small"><i class="bi bi-building me-1"></i>{{ booking.facility.institution.name }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Cancel Modal -->
+<div class="modal fade" id="cancelModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title fw-700">Cancel Booking</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <form method="POST" action="/bookings/{{ booking.pk }}/cancel/">
+        {% csrf_token %}
+        <div class="modal-body">
+          <p>Are you sure you want to cancel <strong>{{ booking.reference_number }}</strong>?</p>
+          <label class="form-label">Reason (optional)</label>
+          <textarea name="reason" class="form-control" rows="3" placeholder="Reason for cancellation..."></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Booking</button>
+          <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Reject Modal (Institution) -->
+{% if user.is_institution and booking.status == 'pending' %}
+<div class="modal fade" id="rejectModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header"><h5 class="modal-title fw-700">Reject Booking</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+      <form method="POST" action="/bookings/{{ booking.pk }}/reject/">
+        {% csrf_token %}
+        <div class="modal-body">
+          <label class="form-label">Reason for Rejection</label>
+          <textarea name="reason" class="form-control" rows="3" placeholder="Please provide a reason..." required></textarea>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Go Back</button>
+          <button type="submit" class="btn btn-danger">Reject Request</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

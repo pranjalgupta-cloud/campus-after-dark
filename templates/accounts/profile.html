@@ -1,0 +1,23 @@
+﻿{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<div class="container py-4" style="max-width:760px;">
+  <h3 class="fw-800 text-navy mb-4">My Profile</h3>
+  <form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="cad-form-card mb-4">
+      <h5 class="fw-700 mb-3"><i class="bi bi-person me-2 text-amber"></i>Account Details</h5>
+      <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">First Name</label><input type="text" name="first_name" class="form-control" value="{{ user.first_name }}"></div>
+        <div class="col-md-6"><label class="form-label">Last Name</label><input type="text" name="last_name" class="form-control" value="{{ user.last_name }}"></div>
+        <div class="col-md-6"><label class="form-label">Email</label><input type="email" class="form-control" value="{{ user.email }}" disabled></div>
+        <div class="col-md-6"><label class="form-label">Phone</label><input type="text" name="phone" class="form-control" value="{{ user.phone }}"></div>
+        <div class="col-md-6"><label class="form-label">Role</label><input class="form-control" value="{{ user.get_role_display }}" disabled></div>
+      </div>
+    </div>
+    {% if institution_profile %}<div class="cad-form-card mb-4"><h5 class="fw-700 mb-3"><i class="bi bi-building me-2 text-amber"></i>Institution Details</h5>{{ profile_form.as_p }}</div>{% endif %}
+    {% if org_profile %}<div class="cad-form-card mb-4"><h5 class="fw-700 mb-3"><i class="bi bi-briefcase me-2 text-amber"></i>Organization Details</h5>{{ profile_form.as_p }}</div>{% endif %}
+    <button type="submit" class="btn cad-btn-primary">Save Changes</button>
+  </form>
+</div>
+{% endblock %}
